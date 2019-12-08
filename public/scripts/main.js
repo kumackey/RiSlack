@@ -15,30 +15,30 @@
  */
 'use strict';
 
+// サインイン時の処理
 function signIn() {
   var provider = new firebase.auth.GoogleAuthProvider();
   firebase.auth().signInWithPopup(provider);
 }
 
+// サインアウト時の処理
 function signOut() {
   firebase.auth().signOut();
 }
 
+// 認証情報の確認　このjsを読み込んだときに発火
 function initFirebaseAuth() {
   firebase.auth().onAuthStateChanged(authStateObserver);
 }
 
+// プロフィールURLを返す
 function getProfilePicUrl() {
   return firebase.auth().currentUser.photoURL || '/image/profile_placeholder.png'
 }
 
+// ユーザーネームを返す
 function getUserName() {
   return firebase.auth().currentUser.displayName;
-}
-
-// Returns true if a user is signed-in.
-function isUserSignedIn() {
-  return !!firebase.auth().currentUser;
 }
 
 // Saves a new message on the Firebase DB.
@@ -53,12 +53,12 @@ function saveMessage(messageText) {
   });
 }
 
-// Loads chat messages history and listens for upcoming ones.
+// DBにあるデータを読み込み、
 function loadMessages() {
   var query = firebase.firestore()
     .collection('messages')
     .orderBy('timestamp', 'desc')
-    .limit(12);
+    .limit(20);
 
   query.onSnapshot(function (snapshot) {
     snapshot.docChanges().forEach(function (change) {
@@ -165,7 +165,7 @@ function authStateObserver(user) {
 // Returns true if user is signed-in. Otherwise false and displays a message.
 function checkSignedInWithMessage() {
   // Return true if the user is signed in Firebase
-  if (isUserSignedIn()) {
+  if (!!firebase.auth().currentUser) {
     return true;
   }
 
@@ -252,7 +252,7 @@ function createAndInsertMessage(id, timestamp) {
   return div;
 }
 
-// Displays a Message in the UI.
+
 function displayMessage(id, timestamp, name, text, picUrl, imageUrl) {
   var div = document.getElementById(id) || createAndInsertMessage(id, timestamp);
 
@@ -292,18 +292,6 @@ function toggleButton() {
     submitButtonElement.setAttribute('disabled', 'true');
   }
 }
-
-// Checks that the Firebase SDK has been correctly setup and configured.
-function checkSetup() {
-  if (!window.firebase || !(firebase.app instanceof Function) || !firebase.app().options) {
-    window.alert('You have not configured and imported the Firebase SDK. ' +
-      'Make sure you go through the codelab setup instructions and make ' +
-      'sure you are running the codelab using `firebase serve`');
-  }
-}
-
-// Checks that Firebase has been imported.
-checkSetup();
 
 // Shortcuts to DOM Elements.
 var messageListElement = document.getElementById('messages');
