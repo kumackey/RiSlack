@@ -99,7 +99,7 @@ main, #messages-card {
   display: inline-block;
   width: 100%;
   padding-left: 40px;
-  color: #bbb;
+  color: #aaa;
   font-style: italic;
   font-size: 12px;
   box-sizing: border-box;
@@ -174,10 +174,10 @@ main, #messages-card {
   display: none;
 }
 .mdl-textfield__label:after {
-  background-color: #0288D1;
+  background-color: green;
 }
 .mdl-textfield--floating-label.is-focused .mdl-textfield__label {
-  color: #0288D1;
+  color: green;
 }
 .mdl-button .material-icons {
   top: -1px;

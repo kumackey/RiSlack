@@ -16,56 +16,56 @@
 'use strict';
 
 // サインイン時の処理
-function signIn() {
-  var provider = new firebase.auth.GoogleAuthProvider();
+const signIn = () => {
+  let provider = new firebase.auth.GoogleAuthProvider();
   firebase.auth().signInWithPopup(provider);
 }
 
 // サインアウト時の処理
-function signOut() {
+const signOut = () => {
   firebase.auth().signOut();
 }
 
 // 認証情報の確認　このjsを読み込んだときに発火
-function initFirebaseAuth() {
+const initFirebaseAuth = () => {
   firebase.auth().onAuthStateChanged(authStateObserver);
 }
 
 // プロフィールURLを返す
-function getProfilePicUrl() {
+const getProfilePicUrl = () => {
   return firebase.auth().currentUser.photoURL || '/image/profile_placeholder.png'
 }
 
 // ユーザーネームを返す
-function getUserName() {
+const getUserName = () => {
   return firebase.auth().currentUser.displayName;
 }
 
-// Saves a new message on the Firebase DB.
-function saveMessage(messageText) {
+// messagesにデータを入れる
+const saveMessage = (messageText) => {
   return firebase.firestore().collection('messages').add({
     name: getUserName(),
     text: messageText,
     profilePicUrl: getProfilePicUrl(),
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  }).catch(function (error) {
+  }).catch((error) => {
     console.error('Error writing new message to database', error);
   });
 }
 
-// DBにあるデータを読み込み、
-function loadMessages() {
-  var query = firebase.firestore()
+// DBにあるデータを読み込み、関数displayMessageに渡す
+const loadMessages = () => {
+  let query = firebase.firestore()
     .collection('messages')
     .orderBy('timestamp', 'desc')
     .limit(20);
 
-  query.onSnapshot(function (snapshot) {
-    snapshot.docChanges().forEach(function (change) {
+  query.onSnapshot((snapshot) => {
+    snapshot.docChanges().forEach((change) => {
       if (change.type === 'removed') {
         deleteMessage(change.doc.id);
       } else {
-        var message = change.doc.data();
+        let message = change.doc.data();
         displayMessage(change.doc.id, message.timestamp, message.name,
           message.text, message.profilePicUrl, message.imageUrl)
       }
@@ -73,17 +73,16 @@ function loadMessages() {
   });
 }
 
-// Saves a new message containing an image in Firebase.
-// This first saves the image in Firebase storage.
-function saveImageMessage(file) {
+// 画像を保存するはずですがブラックボックス。。。
+const saveImageMessage = (file) => {
   firebase.firestore().collection('messages').add({
     name: getUserName(),
-    imageUrl: LOADING_IMAGE_URL,
+    imageUrl: 'https://www.google.com/images/spin-32.gif?a',
     profilePicUrl: getProfilePicUrl(),
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(function(messageRef) {
-    var filePath = firebase.auth().currentUser.uid+'/'+messageRef.id+'/'+file.name;
-    return firebase.storage().ref(filePath).put(file).then(function(fileSnapshot) {
+  }).then((messageRef) => {
+    let filePath = firebase.auth().currentUser.uid+'/'+messageRef.id+'/'+file.name;
+    return firebase.storage().ref(filePath).put(file).then((fileSnapshot) => {
       return fileSnapshot.ref.getDownloadURL().then((url)=>{
         return messageRef.update({
           imageUrl: url,
@@ -91,41 +90,36 @@ function saveImageMessage(file) {
         });
       });
     });
-  }).catch(function(error) {
+  }).catch((error) => {
     console.error('There was an error uploading a file to Cloud Strage:', error)
   })
 }
 
-// Triggered when a file is selected via the media picker.
-function onMediaFileSelected(event) {
+// 下の画像ボタンを押した時に発動
+const onMediaFileSelected = (event) => {
   event.preventDefault();
-  var file = event.target.files[0];
-
-  // Clear the selection in the file picker input.
+  let file = event.target.files[0];
   imageFormElement.reset();
-
-  // Check if the file is an image.
+  
   if (!file.type.match('image.*')) {
-    var data = {
-      message: 'You can only share images',
+    let data = {
+      message: '画像のみアップロードできます',
       timeout: 2000
     };
     signInSnackbarElement.MaterialSnackbar.showSnackbar(data);
     return;
   }
-  // Check if the user is signed-in
+  // サインインしてるかのチェック
   if (checkSignedInWithMessage()) {
     saveImageMessage(file);
   }
 }
 
-// Triggered when the send new message form is submitted.
-function onMessageFormSubmit(e) {
+// 送信ボタンを押した時発火
+const onMessageFormSubmit = (e) => {
   e.preventDefault();
-  // Check that the user entered a message and is signed in.
   if (messageInputElement.value && checkSignedInWithMessage()) {
-    saveMessage(messageInputElement.value).then(function () {
-      // Clear message text field and re-enable the SEND button.
+    saveMessage(messageInputElement.value).then(() => {
       resetMaterialTextfield(messageInputElement);
       toggleButton();
     });
@@ -162,16 +156,13 @@ function authStateObserver(user) {
   }
 }
 
-// Returns true if user is signed-in. Otherwise false and displays a message.
-function checkSignedInWithMessage() {
-  // Return true if the user is signed in Firebase
+// サインインをしてればtrueを返す、してなければ注意してfalseを返す
+const checkSignedInWithMessage = () => {
   if (!!firebase.auth().currentUser) {
     return true;
   }
-
-  // Display a message to the user using a Toast.
-  var data = {
-    message: 'You must sign-in first',
+  let data = {
+    message: 'いずれかの動物でログインして下さい',
     timeout: 2000
   };
   signInSnackbarElement.MaterialSnackbar.showSnackbar(data);
@@ -199,9 +190,6 @@ function addSizeToGoogleProfilePic(url) {
   }
   return url;
 }
-
-// A loading image URL.
-var LOADING_IMAGE_URL = 'https://www.google.com/images/spin-32.gif?a';
 
 // Delete a Message from the UI.
 function deleteMessage(id) {
@@ -283,9 +271,7 @@ function displayMessage(id, timestamp, name, text, picUrl, imageUrl) {
   messageInputElement.focus();
 }
 
-// Enables or disables the submit button depending on the values of the input
-// fields.
-function toggleButton() {
+const toggleButton = () => {
   if (messageInputElement.value) {
     submitButtonElement.removeAttribute('disabled');
   } else {
@@ -293,19 +279,20 @@ function toggleButton() {
   }
 }
 
+// 以下便利だし分かりやすいし、変えるの面倒なのでほぼそのまま
 // Shortcuts to DOM Elements.
-var messageListElement = document.getElementById('messages');
-var messageFormElement = document.getElementById('message-form');
-var messageInputElement = document.getElementById('message');
-var submitButtonElement = document.getElementById('submit');
-var imageButtonElement = document.getElementById('submitImage');
-var imageFormElement = document.getElementById('image-form');
-var mediaCaptureElement = document.getElementById('mediaCapture');
-var userPicElement = document.getElementById('user-pic');
-var userNameElement = document.getElementById('user-name');
-var signInButtonElement = document.getElementById('sign-in');
-var signOutButtonElement = document.getElementById('sign-out');
-var signInSnackbarElement = document.getElementById('must-signin-snackbar');
+let messageListElement = document.getElementById('messages'),
+    messageFormElement = document.getElementById('message-form'),
+    messageInputElement = document.getElementById('message'),
+    submitButtonElement = document.getElementById('submit'),
+    imageButtonElement = document.getElementById('submitImage'),
+    imageFormElement = document.getElementById('image-form'),
+    mediaCaptureElement = document.getElementById('mediaCapture'),
+    userPicElement = document.getElementById('user-pic'),
+    userNameElement = document.getElementById('user-name'),
+    signInButtonElement = document.getElementById('sign-in'),
+    signOutButtonElement = document.getElementById('sign-out'),
+    signInSnackbarElement = document.getElementById('must-signin-snackbar');
 
 // Saves message on form submit.
 messageFormElement.addEventListener('submit', onMessageFormSubmit);
@@ -317,7 +304,7 @@ messageInputElement.addEventListener('keyup', toggleButton);
 messageInputElement.addEventListener('change', toggleButton);
 
 // Events for image upload.
-imageButtonElement.addEventListener('click', function (e) {
+imageButtonElement.addEventListener('click', (e) => {
   e.preventDefault();
   mediaCaptureElement.click();
 });
@@ -327,7 +314,7 @@ mediaCaptureElement.addEventListener('change', onMediaFileSelected);
 initFirebaseAuth();
 
 // Remove the warning about timstamps change. 
-var firestore = firebase.firestore();
+let firestore = firebase.firestore();
 
 // TODO: Enable Firebase Performance Monitoring.
 firebase.performance();
