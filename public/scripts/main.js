@@ -53,18 +53,22 @@ const saveMessage = (messageText) => {
   });
 }
 
-// DBにあるデータを読み込み、関数displayMessageに渡す
+// firestoreにあるmessagesコレクションを読み込み、関数displayMessageに渡す
+//  queryはコレクション
 const loadMessages = () => {
   let query = firebase.firestore()
     .collection('messages')
     .orderBy('timestamp', 'desc')
     .limit(20);
-
+  // onSnapshotとは:queryコレクションをリッスンして、snapshotに渡す
+  // docChangesとは: 変更のあったドキュメント
   query.onSnapshot((snapshot) => {
     snapshot.docChanges().forEach((change) => {
+      // docChangesのtypeには三種類あり、add,remove,modified
       if (change.type === 'removed') {
         deleteMessage(change.doc.id);
       } else {
+        //ここでのchange.doc.date()には、ドキュメントの全データが入ってる
         let message = change.doc.data();
         displayMessage(change.doc.id, message.timestamp, message.name,
           message.text, message.profilePicUrl, message.imageUrl)
@@ -126,32 +130,23 @@ const onMessageFormSubmit = (e) => {
   }
 }
 
-// Triggers when the auth state change for instance when the user signs-in or signs-out.
-function authStateObserver(user) {
-  if (user) { // User is signed in!
-    // Get the signed-in user's profile pic and name.
-    var profilePicUrl = getProfilePicUrl();
-    var userName = getUserName();
-
-    // Set the user's profile pic and name.
+// サインイン・アウトして具体的にviewに反映させること
+const authStateObserver = (user) => {
+  if (user) { 
+    let profilePicUrl = getProfilePicUrl(),
+        userName = getUserName();
     userPicElement.style.backgroundImage = 'url(' + addSizeToGoogleProfilePic(profilePicUrl) + ')';
     userNameElement.textContent = userName;
 
-    // Show user's profile and sign-out button.
     userNameElement.removeAttribute('hidden');
     userPicElement.removeAttribute('hidden');
     signOutButtonElement.removeAttribute('hidden');
-
-    // Hide sign-in button.
     signInButtonElement.setAttribute('hidden', 'true');
 
-  } else { // User is signed out!
-    // Hide user's profile and sign-out button.
+  } else { 
     userNameElement.setAttribute('hidden', 'true');
     userPicElement.setAttribute('hidden', 'true');
     signOutButtonElement.setAttribute('hidden', 'true');
-
-    // Show sign-in button.
     signInButtonElement.removeAttribute('hidden');
   }
 }
@@ -170,21 +165,13 @@ const checkSignedInWithMessage = () => {
 }
 
 // Resets the given MaterialTextField.
-function resetMaterialTextfield(element) {
+const resetMaterialTextfield = (element) => {
   element.value = '';
   element.parentNode.MaterialTextfield.boundUpdateClassesHandler();
 }
 
-// Template for messages.
-var MESSAGE_TEMPLATE =
-  '<div class="message-container">' +
-  '<div class="spacing"><div class="pic"></div></div>' +
-  '<div class="message"></div>' +
-  '<div class="name"></div>' +
-  '</div>';
-
-// Adds a size to Google Profile pics URLs.
-function addSizeToGoogleProfilePic(url) {
+// urlに?sz=150をつける
+const addSizeToGoogleProfilePic = (url) => {
   if (url.indexOf('googleusercontent.com') !== -1 && url.indexOf('?') === -1) {
     return url + '?sz=150';
   }
@@ -200,64 +187,67 @@ function deleteMessage(id) {
   }
 }
 
-function createAndInsertMessage(id, timestamp) {
-  const container = document.createElement('div');
-  container.innerHTML = MESSAGE_TEMPLATE;
-  const div = container.firstChild;
-  div.setAttribute('id', id);
+const MESSAGE_TEMPLATE =
+  '<div class="message-container">' +
+  '<div class="spacing"><div class="pic"></div></div>' +
+  '<div class="message"></div>' +
+  '<div class="name"></div>' +
+  '</div>';
 
-  // If timestamp is null, assume we've gotten a brand new message.
-  // https://stackoverflow.com/a/47781432/4816918
+// メッセージ一覧に指定idが無い時に、#messagesの子ノードにtimestampを考慮に入れながら挿入
+const createAndInsertMessage = (id, timestamp) => {
+  const container = document.createElement('div');
+  // innerHTMLとは: container Elementに対して、指定のhtmlを入れる
+  container.innerHTML = MESSAGE_TEMPLATE;
+  // firstChildは第一子ノードを取り出すが、改行も1つの子ノードなので注意
+  const div = container.firstChild;
+  // ここでidとして渡されているのは、ドキュメントのなっがいid
+  div.setAttribute('id', id);
   timestamp = timestamp ? timestamp.toMillis() : Date.now();
   div.setAttribute('timestamp', timestamp);
 
-  // figure out where to insert new message
   const existingMessages = messageListElement.children;
   if (existingMessages.length === 0) {
+    // もし#messagesの子ノードに何もなかったらdivを追加する
     messageListElement.appendChild(div);
   } else {
     let messageListNode = existingMessages[0];
 
     while (messageListNode) {
+      // 比較するためにtimestamp属性を引き出す
       const messageListNodeTime = messageListNode.getAttribute('timestamp');
-
       if (!messageListNodeTime) {
         throw new Error(
           `Child ${messageListNode.id} has no 'timestamp' attribute`
         );
       }
-
       if (messageListNodeTime > timestamp) {
         break;
       }
-
       messageListNode = messageListNode.nextSibling;
     }
-
     messageListElement.insertBefore(div, messageListNode);
   }
-
   return div;
 }
 
 
-function displayMessage(id, timestamp, name, text, picUrl, imageUrl) {
-  var div = document.getElementById(id) || createAndInsertMessage(id, timestamp);
-
-  // profile picture
+const displayMessage = (id, timestamp, name, text, picUrl, imageUrl) => {
+  let div = document.getElementById(id) || createAndInsertMessage(id, timestamp);
   if (picUrl) {
     div.querySelector('.pic').style.backgroundImage = 'url(' + addSizeToGoogleProfilePic(picUrl) + ')';
   }
-
   div.querySelector('.name').textContent = name;
-  var messageElement = div.querySelector('.message');
+  let messageElement = div.querySelector('.message');
+  if (text) { 
 
-  if (text) { // If the message is text.
+    // ここにあとで条件分岐を入れる！動物によってtextを入れるのか、を変える
+
     messageElement.textContent = text;
-    // Replace all line breaks by <br>.
     messageElement.innerHTML = messageElement.innerHTML.replace(/\n/g, '<br>');
-  } else if (imageUrl) { // If the message is an image.
-    var image = document.createElement('img');
+    // 以下画像表示　ブラックボックス。。。
+  } else if (imageUrl) {
+    let image = document.createElement('img');
     image.addEventListener('load', function () {
       messageListElement.scrollTop = messageListElement.scrollHeight;
     });
@@ -265,8 +255,7 @@ function displayMessage(id, timestamp, name, text, picUrl, imageUrl) {
     messageElement.innerHTML = '';
     messageElement.appendChild(image);
   }
-  // Show the card fading-in and scroll to view the new message.
-  setTimeout(function () { div.classList.add('visible') }, 1);
+  setTimeout(() => { div.classList.add('visible') }, 1);
   messageListElement.scrollTop = messageListElement.scrollHeight;
   messageInputElement.focus();
 }
@@ -279,7 +268,9 @@ const toggleButton = () => {
   }
 }
 
+
 // 以下便利だし分かりやすいし、変えるの面倒なのでほぼそのまま
+
 // Shortcuts to DOM Elements.
 let messageListElement = document.getElementById('messages'),
     messageFormElement = document.getElementById('message-form'),
