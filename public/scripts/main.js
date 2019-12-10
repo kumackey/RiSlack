@@ -23,16 +23,13 @@ const signInGoogle = () => {
 
 // 以下3つをDRYに書きたかったが、実装力がなかった。。。
 const signInRisuzaru = () => {
-  let provider = new firebase.auth().signInWithEmailAndPassword("risuzaru@example.com", "password");
-  firebase.auth().signInWithPopup(provider);
+  firebase.auth().signInWithEmailAndPassword("risuzaru@example.com", "password");
 }
 const signInNihonrisu = () => {
-  let provider = new firebase.auth().signInWithEmailAndPassword("nihonrisu@example.com", "password");
-  firebase.auth().signInWithPopup(provider);
+  firebase.auth().signInWithEmailAndPassword("nihonrisu@example.com", "password");
 }
 const signInStandrisu = () => {
-  let provider = new firebase.auth().signInWithEmailAndPassword("standrisu@example.com", "password");
-  firebase.auth().signInWithPopup(provider);
+  firebase.auth().signInWithEmailAndPassword("standrisu@example.com", "password");
 }
 
 // サインアウト時の処理
