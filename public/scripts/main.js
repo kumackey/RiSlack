@@ -42,18 +42,14 @@ const initFirebaseAuth = () => {
   firebase.auth().onAuthStateChanged(authStateObserver);
 }
 
-// プロフィールURLを返す
-const getProfilePicUrl = () => {
-
-    // ここに条件分岐 動物ならその写真をリターン
-
-  return firebase.auth().currentUser.photoURL || '/images/profile_placeholder.png'
-}
-
 // ユーザーネームを返す
 const getUserName = () => {
-  let user = firebase.auth().currentUser;
-  return user.displayName;
+  return firebase.auth().currentUser.displayName;
+}
+
+// プロフィールURLを返す
+const getProfilePicUrl = () => {
+  return firebase.auth().currentUser.photoURL || '/images/profile_placeholder.png'
 }
 
 // messagesにデータを入れる
