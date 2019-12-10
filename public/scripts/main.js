@@ -21,6 +21,20 @@ const signInGoogle = () => {
   firebase.auth().signInWithPopup(provider);
 }
 
+// 以下3つをDRYに書きたかったが、実装力がなかった。。。
+const signInRisuzaru = () => {
+  let provider = new firebase.auth().signInWithEmailAndPassword("risuzaru@example.com", "password");
+  firebase.auth().signInWithPopup(provider);
+}
+const signInNihonrisu = () => {
+  let provider = new firebase.auth().signInWithEmailAndPassword("nihonrisu@example.com", "password");
+  firebase.auth().signInWithPopup(provider);
+}
+const signInStandrisu = () => {
+  let provider = new firebase.auth().signInWithEmailAndPassword("standrisu@example.com", "password");
+  firebase.auth().signInWithPopup(provider);
+}
+
 // サインアウト時の処理
 const signOut = () => {
   firebase.auth().signOut();
@@ -36,15 +50,13 @@ const getProfilePicUrl = () => {
 
     // ここに条件分岐 動物ならその写真をリターン
 
-  return firebase.auth().currentUser.photoURL || '/image/profile_placeholder.png'
+  return firebase.auth().currentUser.photoURL || '/images/profile_placeholder.png'
 }
 
 // ユーザーネームを返す
 const getUserName = () => {
-
-  // ここに条件分岐 動物ならその名前をリターン
-
-  return firebase.auth().currentUser.displayName;
+  let user = firebase.auth().currentUser;
+  return user.displayName;
 }
 
 // messagesにデータを入れる
@@ -148,13 +160,19 @@ const authStateObserver = (user) => {
     userNameElement.removeAttribute('hidden');
     userPicElement.removeAttribute('hidden');
     signOutButtonElement.removeAttribute('hidden');
-    signInButtonElement.setAttribute('hidden', 'true');
+    signInGoogleButtonElement.setAttribute('hidden', 'true');
+    signInStandrisuButtonElement.setAttribute('hidden', 'true');
+    signInNihonrisuButtonElement.setAttribute('hidden', 'true');
+    signInRisuzaruButtonElement.setAttribute('hidden', 'true');
 
   } else { 
     userNameElement.setAttribute('hidden', 'true');
     userPicElement.setAttribute('hidden', 'true');
     signOutButtonElement.setAttribute('hidden', 'true');
-    signInButtonElement.removeAttribute('hidden');
+    signInGoogleButtonElement.removeAttribute('hidden');
+    signInStandrisuButtonElement.removeAttribute('hidden');
+    signInNihonrisuButtonElement.removeAttribute('hidden');
+    signInRisuzaruButtonElement.removeAttribute('hidden');
   }
 }
 
@@ -290,14 +308,21 @@ let messageListElement = document.getElementById('messages'),
     mediaCaptureElement = document.getElementById('mediaCapture'),
     userPicElement = document.getElementById('user-pic'),
     userNameElement = document.getElementById('user-name'),
-    signInButtonElement = document.getElementById('sign-in'),
+    signInGoogleButtonElement = document.getElementById('sign-in-Google'),
+    signInStandrisuButtonElement = document.getElementById('sign-in-standrisu'),
+    signInNihonrisuButtonElement = document.getElementById('sign-in-nihonrisu'),
+    signInRisuzaruButtonElement = document.getElementById('sign-in-risuzaru'),
     signOutButtonElement = document.getElementById('sign-out'),
     signInSnackbarElement = document.getElementById('must-signin-snackbar');
 
 // Saves message on form submit.
 messageFormElement.addEventListener('submit', onMessageFormSubmit);
 signOutButtonElement.addEventListener('click', signOut);
-signInButtonElement.addEventListener('click', signInGoogle);
+signInGoogleButtonElement.addEventListener('click', signInGoogle);
+// ここもDRYにしたかった。。。
+signInStandrisuButtonElement.addEventListener('click', signInStandrisu);
+signInNihonrisuButtonElement.addEventListener('click', signInNihonrisu);
+signInRisuzaruButtonElement.addEventListener('click', signInRisuzaru);
 
 // Toggle for the button.
 messageInputElement.addEventListener('keyup', toggleButton);
