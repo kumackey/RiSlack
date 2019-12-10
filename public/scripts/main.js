@@ -15,8 +15,8 @@
  */
 'use strict';
 
-// サインイン時の処理
-const signIn = () => {
+// googleアカウントでサインインしたいときにポップアップ表示
+const signInGoogle = () => {
   let provider = new firebase.auth.GoogleAuthProvider();
   firebase.auth().signInWithPopup(provider);
 }
@@ -33,11 +33,17 @@ const initFirebaseAuth = () => {
 
 // プロフィールURLを返す
 const getProfilePicUrl = () => {
+
+    // ここに条件分岐 動物ならその写真をリターン
+
   return firebase.auth().currentUser.photoURL || '/image/profile_placeholder.png'
 }
 
 // ユーザーネームを返す
 const getUserName = () => {
+
+  // ここに条件分岐 動物ならその名前をリターン
+
   return firebase.auth().currentUser.displayName;
 }
 
@@ -77,7 +83,7 @@ const loadMessages = () => {
   });
 }
 
-// 画像を保存するはずですがブラックボックス。。。
+// 画像をmessageコレクションに保存　ただしブラックボックス。。。
 const saveImageMessage = (file) => {
   firebase.firestore().collection('messages').add({
     name: getUserName(),
@@ -110,6 +116,7 @@ const onMediaFileSelected = (event) => {
       message: '画像のみアップロードできます',
       timeout: 2000
     };
+    // 上のdataを表示させるためのもの
     signInSnackbarElement.MaterialSnackbar.showSnackbar(data);
     return;
   }
@@ -153,6 +160,9 @@ const authStateObserver = (user) => {
 
 // サインインをしてればtrueを返す、してなければ注意してfalseを返す
 const checkSignedInWithMessage = () => {
+
+// 条件分岐を加える　動物としてlogged inしてるかどうか
+
   if (!!firebase.auth().currentUser) {
     return true;
   }
@@ -160,11 +170,11 @@ const checkSignedInWithMessage = () => {
     message: 'いずれかの動物でログインして下さい',
     timeout: 2000
   };
+  // 上のdataを表示させるためのもの
   signInSnackbarElement.MaterialSnackbar.showSnackbar(data);
   return false;
 }
 
-// Resets the given MaterialTextField.
 const resetMaterialTextfield = (element) => {
   element.value = '';
   element.parentNode.MaterialTextfield.boundUpdateClassesHandler();
@@ -178,10 +188,9 @@ const addSizeToGoogleProfilePic = (url) => {
   return url;
 }
 
-// Delete a Message from the UI.
-function deleteMessage(id) {
-  var div = document.getElementById(id);
-  // If an element for that message exists we delete it.
+// おそらく、queryのlimit数からはみ出たメッセージを削除するためのもの
+const deleteMessage = (id) => {
+  let div = document.getElementById(id);
   if (div) {
     div.parentNode.removeChild(div);
   }
@@ -288,7 +297,7 @@ let messageListElement = document.getElementById('messages'),
 // Saves message on form submit.
 messageFormElement.addEventListener('submit', onMessageFormSubmit);
 signOutButtonElement.addEventListener('click', signOut);
-signInButtonElement.addEventListener('click', signIn);
+signInButtonElement.addEventListener('click', signInGoogle);
 
 // Toggle for the button.
 messageInputElement.addEventListener('keyup', toggleButton);
