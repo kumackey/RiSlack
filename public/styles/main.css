@@ -94,7 +94,7 @@ main, #messages-card {
 }
 .message-container .name {
   display: inline-block;
-  width: 100%;
+  width: 50%;
   padding-left: 40px;
   color: #aaa;
   font-style: italic;
@@ -198,6 +198,16 @@ main, #messages-card {
 .mdl-button .material-icons {
   top: -1px;
   margin-right: 5px;
+}
+.display-timestamp {
+  text-align: right;
+  display: inline-block;
+  width: 50%;
+  color: #aaa;
+  font-style: italic;
+  font-size: 12px;
+  box-sizing: border-box;
+  padding-right: 10px;
 }
 
 

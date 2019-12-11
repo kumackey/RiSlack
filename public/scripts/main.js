@@ -171,9 +171,6 @@ const authStateObserver = (user) => {
 
 // サインインをしてればtrueを返す、してなければ注意してfalseを返す
 const checkSignedInWithMessage = () => {
-
-// 条件分岐を加える　動物としてlogged inしてるかどうか
-
   if (!!firebase.auth().currentUser) {
     return true;
   }
