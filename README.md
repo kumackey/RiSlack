@@ -2,10 +2,10 @@
 ## 概要
 URL: https://gs-chat-282bd.firebaseapp.com/
 
-発想力が致命的な人間なので、ネットに落ちてたチュートリアルに毛を生やしただけです。
+発想力が致命的な人間なので、ネットに落ちてたチュートリアルに毛を生やしただけです。  
 そのチュートリアル: [Firebase web codelab](https://codelabs.developers.google.com/codelabs/firebase-web/#0)
 
-もちろん試しに送信していただいて大丈夫です。
+もちろん試しに送信していただいて大丈夫です。  
 ちなみにリスザルでログインし送信すると鳴き声にしかならないバグがあります。
 
 ## コード等
