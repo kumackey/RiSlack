@@ -14,6 +14,37 @@ URL: https://gs-chat-282bd.firebaseapp.com/
 
 - Database構造のスクリーンショット: https://drive.google.com/file/d/1IZmqPo-hIJlDwQYZ-tFJGk95BxApKNX1/view?usp=sharing
 
+- Database Rule:
+
+```JavaScript
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Messages:
+    //   - Anyone can read.
+    //   - Authenticated users can add and edit messages.
+    //   - Validation: Check name is same as auth token and text length below 300 char or that imageUrl is a URL.
+    //   - Deletes are not allowed.
+    match /messages/{messageId} {
+      allow read;
+      allow create, update: if request.auth != null
+                    && request.resource.data.name == request.auth.token.name
+                    && (request.resource.data.text is string
+                      && request.resource.data.text.size() <= 300
+                      || request.resource.data.imageUrl is string
+                      && request.resource.data.imageUrl.matches('https?://.*'));
+      allow delete: if false;
+    }
+    // FCM Tokens:
+    //   - Anyone can write their token.
+    //   - Reading list of tokens is not allowed.
+    match /fcmTokens/{token} {
+      allow read: if false;
+      allow write;
+    }
+  }
+}
+```
+
 - Storage Rule:
 
 ```JavaScript
@@ -32,6 +63,8 @@ service firebase.storage {
   }
 }
 ```
+
+
 
 ## 反省点
 1. mdlの理解まで手が回らず、既存のhtml,cssをあまり弄れなかった。
