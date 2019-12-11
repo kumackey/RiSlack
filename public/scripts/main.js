@@ -212,6 +212,7 @@ const MESSAGE_TEMPLATE =
   '<div class="spacing"><div class="pic"></div></div>' +
   '<div class="message"></div>' +
   '<div class="name"></div>' +
+  '<div class="display-timestamp"></div>' +
   '</div>';
 
 // メッセージ一覧に指定idが無い時に、#messagesの子ノードにtimestampを考慮に入れながら挿入
@@ -251,6 +252,15 @@ const createAndInsertMessage = (id, timestamp) => {
   return div;
 }
 
+const FromTimeStampToDate = (date) => {
+  const d = new Date(date.seconds * 1000);
+  const year = d.getFullYear();
+  const month = (`0${d.getMonth() + 1}`).slice(-2);
+  const day = (`0${d.getDate()}`).slice(-2);
+  const hour = (`0${d.getHours()}`).slice(-2);
+  const min = (`0${d.getMinutes()}`).slice(-2);
+  return `${year}/${month}/${day}  ${hour}:${min}`;
+}
 
 const displayMessage = (id, timestamp, name, text, picUrl, imageUrl) => {
   let div = document.getElementById(id) || createAndInsertMessage(id, timestamp);
@@ -258,6 +268,7 @@ const displayMessage = (id, timestamp, name, text, picUrl, imageUrl) => {
     div.querySelector('.pic').style.backgroundImage = 'url(' + addSizeToGoogleProfilePic(picUrl) + ')';
   }
   div.querySelector('.name').textContent = name;
+  div.querySelector('.display-timestamp').textContent = FromTimeStampToDate(timestamp);
   let messageElement = div.querySelector('.message');
   if (text) { 
 
