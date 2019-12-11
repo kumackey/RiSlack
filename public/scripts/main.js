@@ -44,7 +44,12 @@ const initFirebaseAuth = () => {
 
 // ユーザーネームを返す
 const getUserName = () => {
-  return firebase.auth().currentUser.displayName;
+  let user = firebase.auth().currentUser;
+  if (user) {
+    return user.displayName;
+  } else {
+    return "";
+  }
 }
 
 // プロフィールURLを返す
@@ -54,6 +59,9 @@ const getProfilePicUrl = () => {
 
 // messagesにデータを入れる
 const saveMessage = (messageText) => {
+  if (getUserName() == "リスザル") {
+    messageText = "キー！キー！";
+  }
   return firebase.firestore().collection('messages').add({
     name: getUserName(),
     text: messageText,
@@ -149,7 +157,6 @@ const authStateObserver = (user) => {
         userName = getUserName();
     userPicElement.style.backgroundImage = 'url(' + addSizeToGoogleProfilePic(profilePicUrl) + ')';
     userNameElement.textContent = userName;
-
     userNameElement.removeAttribute('hidden');
     userPicElement.removeAttribute('hidden');
     signOutButtonElement.removeAttribute('hidden');
@@ -157,7 +164,6 @@ const authStateObserver = (user) => {
     signInStandrisuButtonElement.setAttribute('hidden', 'true');
     signInNihonrisuButtonElement.setAttribute('hidden', 'true');
     signInRisuzaruButtonElement.setAttribute('hidden', 'true');
-
   } else { 
     userNameElement.setAttribute('hidden', 'true');
     userPicElement.setAttribute('hidden', 'true');
@@ -249,14 +255,14 @@ const createAndInsertMessage = (id, timestamp) => {
   return div;
 }
 
+//時間を表示するための変換関数
 const FromTimeStampToDate = (date) => {
   const d = new Date(date.seconds * 1000);
-  const year = d.getFullYear();
   const month = (`0${d.getMonth() + 1}`).slice(-2);
   const day = (`0${d.getDate()}`).slice(-2);
   const hour = (`0${d.getHours()}`).slice(-2);
   const min = (`0${d.getMinutes()}`).slice(-2);
-  return `${year}/${month}/${day}  ${hour}:${min}`;
+  return `${month}月${day}日　${hour}:${min}`;
 }
 
 const displayMessage = (id, timestamp, name, text, picUrl, imageUrl) => {
@@ -268,9 +274,6 @@ const displayMessage = (id, timestamp, name, text, picUrl, imageUrl) => {
   div.querySelector('.display-timestamp').textContent = FromTimeStampToDate(timestamp);
   let messageElement = div.querySelector('.message');
   if (text) { 
-
-    // ここにあとで条件分岐を入れる！動物によってtextを入れるのか、を変える
-
     messageElement.textContent = text;
     messageElement.innerHTML = messageElement.innerHTML.replace(/\n/g, '<br>');
     // 以下画像表示　ブラックボックス。。。
@@ -295,7 +298,6 @@ const toggleButton = () => {
     submitButtonElement.setAttribute('disabled', 'true');
   }
 }
-
 
 // 以下便利だし分かりやすいし、変えるの面倒なのでほぼそのまま
 
